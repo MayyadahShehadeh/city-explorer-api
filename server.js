@@ -2,32 +2,32 @@ const express = require('express') // require the express package
 const app = express() // initialize your express app instance
 const cors = require('cors');
 require('dotenv').config();
+const axios=require('axios');
 app.use(cors()) 
+const weather = require('./data/weather.json');
+const { response } = require('express');
 const PORT = process.env.PORT;
- const weather = require('./data/weather.json');
-
 app.get('/', function (req, res) { res.send('Hello World')})
  
 
 app.get('/weather', (req,res) => {
-let lat=req.query.lat
-let lon=req.query.lon
-let searchQuery=req.query.searchQuery
-
-let getData=()=>{
-  let city=weather.find((item,idx)=>{
-    return (item.city_name.toLowerCase()=== searchQuery.toLowerCase() && item.lat === Number(lat) && item.lon===Number(lon))
+  let weather;
+  let lat=req.query.lat
+  let lon=req.query.lon
+  let url=`https://api.weatherbit.io/v2.0/forecast/daily?key=${process.env.WEATHER_API_KEY}&lat=${lat}&lon=${lon}&searchQuery=amman`;
+let weatherBit = axios.get(url).then(response =>{
+  weather=response.data
+  let city=weather.data.map((item,idx)=>{
+    return new ForeCast(item)
   })
-  console.log();
-return city.data.map(value=>{
-  return new ForeCast(value)
-})
+  console.log(weather.data);
+  res.json(city);
+});
+});
 
 
-}
-res.json(getData());
-}
-) 
+
+
  class ForeCast{
    constructor(weatherData){
      this.date=weatherData.valid_date
