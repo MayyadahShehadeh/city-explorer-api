@@ -3,10 +3,10 @@ const app = express() // initialize your express app instance
 const cors = require('cors');
 require('dotenv').config();
 const axios=require('axios');
-app.use(cors()) 
+app.use(cors());
 const weather = require('./data/weather.json');
 const PORT = process.env.PORT;
-
+const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
 
 
 app.get('/', function (req, res) { res.send('Hello World')})
@@ -29,11 +29,19 @@ let weatherBit = axios.get(url).then(response =>{
 
 // movie --------------
 
-// app.get('movie',(req,res){
+app.get('/movies', (req,res) => {
+  let movies;
+  let cityName=req.query.city_Name
 
-
-
-// })
+  let movieUrl=`https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${cityName}`;
+let movieRes = axios.get(movieUrl).then(response =>{
+  movies=response.data
+  let moviee=movies.map(element=>{
+    return new Movie(element);
+  });
+  res.json(moviee);
+}).catch(error=>res.json({message:error}));
+})
 
 
  class ForeCast{
@@ -44,6 +52,16 @@ let weatherBit = axios.get(url).then(response =>{
      this.lon=weatherData.lon
    }
  }
+
+ class Movie {
+  constructor(movieData) {
+      this.title = movieData.title;
+      this.overview = movieData.overview;
+      this.vote_average = movieData.vote_average;
+      this.image_url = `https://image.tmdb.org/t/p/w500/${movieData.poster_path}.jpg`;
+  }
+}
+
 
 app.listen(PORT,()=>{
   console.log(`starting in port ${PORT}`)
