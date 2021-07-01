@@ -30,18 +30,19 @@ let weatherBit = axios.get(url).then(response =>{
 // movie --------------
 
 app.get('/movies', (req,res) => {
-  let movies;
-  let cityName=req.query.city_Name
-
-  let movieUrl=`https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${cityName}`;
-let movieRes = axios.get(movieUrl).then(response =>{
-  movies=response.data
-  let moviee=movies.map(element=>{
-    return new Movie(element);
-  });
-  res.json(moviee);
-}).catch(error=>res.json({message:error}));
-})
+  
+    let cityName=req.query.city
+   let movieURL=`https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${cityName}`
+ 
+   let movieRes=axios.get(movieURL).then(response => {
+     let movies=response.data.results.map(element=>{
+       return new Movie (element);
+      });
+     res.json(movies)
+   }).catch(err=>{
+     res.status(500).send(`error in getting data ==> ${err}`)
+ })
+ })
 
 
  class ForeCast{
@@ -53,14 +54,16 @@ let movieRes = axios.get(movieUrl).then(response =>{
    }
  }
 
- class Movie {
-  constructor(movieData) {
-      this.title = movieData.title;
-      this.overview = movieData.overview;
-      this.vote_average = movieData.vote_average;
-      this.image_url = `https://image.tmdb.org/t/p/w500/${movieData.poster_path}.jpg`;
+ class Movie{
+  constructor(movieData){
+    this.title = movieData.title;
+    this.overview = movieData.overview;
+    this.vote_average = movieData.vote_average;
+    this.image_url = `https://image.tmdb.org/t/p/w500/${movieData.poster_path}.${movieData.logo_path}`;
   }
 }
+
+
 
 
 app.listen(PORT,()=>{
